@@ -1,4 +1,4 @@
-pacman::p_load(dplyr, caret, randomForest)
+pacman::p_load(dplyr, caret, randomForest, e1071)
 source("scripts/pre_processing.R")
 source("scripts/training_functions.R")
 
@@ -36,18 +36,24 @@ wifi_data_floors_b2 <- wifi_data %>% filter(BUILDINGID == 2)
 low_var_cols_floor_b0_index <- lowVarianceCol(wifi_data_floors_b0, 2)
 wifi_data_floors_b0 <- wifi_data_floors_b0[, -low_var_cols_floor_b0_index]
 
-low_var_cols_floor_b1_index <- lowVarianceCol(wifi_data_floors_b1, 2)
+low_var_cols_floor_b1_index <- lowVarianceCol(wifi_data_floors_b1, 7)
 wifi_data_floors_b1 <- wifi_data_floors_b1[, -low_var_cols_floor_b1_index]
 
 low_var_cols_floor_b2_index <- lowVarianceCol(wifi_data_floors_b2, 2)
 wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index]
 
+#Sampling floors for each building
+wifi_data_floors_b0 <- wifi_data_floors_b0 %>% 
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
-#Sampling floors for each building (Each floor having 50 points)
-#TODO Check if the samples below are representative
-wifi_data_floors_b0 <- wifi_data_floors_b0 %>% group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% sample_n(2)
-wifi_data_floors_b1 <- wifi_data_floors_b1 %>% group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% sample_n(2)
-wifi_data_floors_b2 <- wifi_data_floors_b2 %>% group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% sample_n(2)
+wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
+
+wifi_data_floors_b2 <- wifi_data_floors_b2 %>% 
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
 #Creating the final dataset for Building location prediction
 wap_data_buildings <- wifi_data_buildings[, wapColIndex(wifi_data_buildings)]
@@ -99,38 +105,70 @@ model_building <- randomForest(y = data_building$training$BUILDINGID,
 
 #Training the floor prediction model for each building
 number_predictors_fb0 <- ncol(data_floor_b0$training) - 1
-model_floor_b0 <- randomForest(y = data_floor_b0$training$FLOOR,
-                               x = data_floor_b0$training[, 1:number_predictors_fb0],
-                               importance = T,
-                               method = "rf", 
-                               ntree = 400, 
-                               mtry = 13)
-
 number_predictors_fb1 <- ncol(data_floor_b1$training) - 1
-model_floor_b1 <- randomForest(y = data_floor_b1$training$FLOOR,
-                               x = data_floor_b1$training[, 1:number_predictors_fb1],
-                               importance = T,
-                               method = "rf", 
-                               ntree = 500, 
-                               mtry = 11)
-
 number_predictors_fb2 <- ncol(data_floor_b2$training) - 1
-model_floor_b2 <- randomForest(y=data_floor_b2$training$FLOOR,
-                               x=data_floor_b2$training[, 1:number_predictors_fb2],
-                               importance=T,
-                               method="rf", 
-                               ntree=500, 
-                               mtry=14)
+#Random Forest - B0
+# model_floor_b0 <- randomForest(y = data_floor_b0$training$FLOOR,
+#                                x = data_floor_b0$training[, 1:number_predictors_fb0],
+#                                importance = T,
+#                                method = "rf",
+#                                ntree = 400,
+#                                mtry = 13)
 
+#K-NN - B0
+# model_floor_b0 <- knn3(FLOOR ~ ., data = data_floor_b0$training, k = 3)
+
+#SVM - B0
+model_floor_b0 <- svm(formula = FLOOR ~ ., 
+                      data = data_floor_b0$training,
+                      kernel = "radial",
+                      cost = 10,
+                      gamma = 0.001953125)
+
+#Random Forest - B1
+# model_floor_b1 <- randomForest(y = data_floor_b1$training$FLOOR,
+#                                x = data_floor_b1$training[, 1:number_predictors_fb1],
+#                                importance = T,
+#                                method = "rf",
+#                                ntree = 500,
+#                                mtry = 11)
+
+#K-NN - B1
+# model_floor_b1 <- knn3(FLOOR ~ ., data = data_floor_b1$training, k = 3)
+
+#SVM - B1
+model_floor_b1 <- svm(formula = FLOOR ~ ., 
+                      data = data_floor_b1$training,
+                      kernel = "radial",
+                      cost = 1,
+                      gamma = 0.00390625)
+
+#Random Forest - B2
+# model_floor_b2 <- randomForest(y=data_floor_b2$training$FLOOR,
+#                                x=data_floor_b2$training[, 1:number_predictors_fb2],
+#                                importance=T,
+#                                method="rf",
+#                                ntree=500,
+#                                mtry=14)
+
+#K-NN - B2
+# model_floor_b2 <- knn3(FLOOR ~ ., data = data_floor_b2$training, k = 3)
+
+#SVM - B2
+model_floor_b2 <- svm(formula = FLOOR ~ ., 
+                      data = data_floor_b2$training,
+                      kernel = "radial",
+                      cost = 10,
+                      gamma = 0.0009765625)
 
 ####Predictions####
 #Predicting the building in test set created
 predictions_building <- predict(model_building, data_building$testing)
 
 #Predictions the floor in test set created for each building
-predictions_floor_b0 <- predict(model_floor_b0, data_floor_b0$testing)
-predictions_floor_b1 <- predict(model_floor_b1, data_floor_b1$testing)
-predictions_floor_b2 <- predict(model_floor_b2, data_floor_b2$testing)
+predictions_floor_b0 <- predict(model_floor_b0, data_floor_b0$testing, type = "class")
+predictions_floor_b1 <- predict(model_floor_b1, data_floor_b1$testing, type = "class")
+predictions_floor_b2 <- predict(model_floor_b2, data_floor_b2$testing, type = "class")
 
 #Prepare the validation set for prediction
 validation_set <- replaceNoWAPValues(wifi_validation_original, no_wap_value)
@@ -158,9 +196,9 @@ validation_set_floor_b2 <- cbind(validation_set_floor_b2[, wapNamesB2],
 predictions_validation_buildings <- predict(model_building, validation_set_building)
 
 #Predicting floor in validation set for each building
-predictions_validation_floor_b0 <- predict(model_floor_b0, validation_set_floor_b0)
-predictions_validation_floor_b1 <- predict(model_floor_b1, validation_set_floor_b1)
-predictions_validation_floor_b2 <- predict(model_floor_b2, validation_set_floor_b2)
+predictions_validation_floor_b0 <- predict(model_floor_b0, validation_set_floor_b0, type = "class")
+predictions_validation_floor_b1 <- predict(model_floor_b1, validation_set_floor_b1, type = "class")
+predictions_validation_floor_b2 <- predict(model_floor_b2, validation_set_floor_b2, type = "class")
 
 ####Error Analysis####
 #For building predictions
@@ -178,3 +216,4 @@ assess_model_validation_floor_b1 <- postResample(predictions_validation_floor_b1
                                                  validation_set_floor_b1$FLOOR)
 assess_model_validation_floor_b2 <- postResample(predictions_validation_floor_b2, 
                                                  validation_set_floor_b2$FLOOR)
+
