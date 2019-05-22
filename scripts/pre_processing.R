@@ -61,5 +61,5 @@ lowVarianceCol <- function(wifiData, var_cutoff) {
 }
 
 wapColIndex <- function(wifiData) {
-  1:(ncol(wifiData) - 9)
+  grep("WAP", colnames(wifiData))
 }
