@@ -70,17 +70,17 @@ wifi_data_floors_b2 <- wifi_data_floors_b2 %>%
   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
 #Removing columns with low variance (if any) after sampling
-low_var_cols_floor_b0_index2 <- lowVarianceCol(wifi_data_floors_b0, 2)
+low_var_cols_floor_b0_index2 <- lowVarianceCol(wifi_data_floors_b0, 1)
 if (length(low_var_cols_floor_b0_index2) != 0) {
   wifi_data_floors_b0 <- wifi_data_floors_b0[, -low_var_cols_floor_b0_index2]
 }
 
-low_var_cols_floor_b1_index2 <- lowVarianceCol(wifi_data_floors_b1, 2)
+low_var_cols_floor_b1_index2 <- lowVarianceCol(wifi_data_floors_b1, 1)
 if (length(low_var_cols_floor_b1_index2) != 0) {
   wifi_data_floors_b1 <- wifi_data_floors_b1[, -low_var_cols_floor_b1_index2]
 }
 
-low_var_cols_floor_b2_index2 <- lowVarianceCol(wifi_data_floors_b2, 2)
+low_var_cols_floor_b2_index2 <- lowVarianceCol(wifi_data_floors_b2, 1)
 if (length(low_var_cols_floor_b2_index2) != 0) {
   wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index2]
 }
