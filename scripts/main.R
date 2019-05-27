@@ -272,7 +272,7 @@ model_lat_b1 <- randomForest(y = data_lat_b1$training$LATITUDE,
 #K-NN - B1
 # model_lat_b1 <- knnreg(LATITUDE ~ ., data = data_lat_b1$training, k = 5)
 
-#SVM - B0
+#SVM - B1
 # model_lat_b1 <- svm(formula = LATITUDE ~ .,
 #                       data = data_lat_b1$training,
 #                       kernel = "radial",
@@ -287,15 +287,15 @@ model_lat_b1 <- randomForest(y = data_lat_b1$training$LATITUDE,
 #                              ntree = 500,
 #                              mtry = 20)
 
-#K-NN - B1
+#K-NN - B2
 model_lat_b2 <- knnreg(LATITUDE ~ ., data = data_lat_b2$training, k = 11)
 
-#SVM - B0
+#SVM - B2
 # model_lat_b2 <- svm(formula = LATITUDE ~ .,
-#                       data = data_lat_b2$training,
-#                       kernel = "radial",
-#                       cost = 1000,
-#                       gamma = 9.536743e-07)
+#                     data = data_lat_b2$training,
+#                     kernel = "radial",
+#                     cost = 1000,
+#                     gamma = 9.536743e-07)
 
 
 
