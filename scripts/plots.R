@@ -42,6 +42,18 @@ predictedPointsErrors <- function(predictedPoints, validation_set, errors) {
     scale_color_gradient(low = "blue", high = "red")
 }
 
+floorLatLonPredict <- function(predictions, validation_set) {
+  tempData <- validation_set %>% 
+    select(FLOOR) %>% 
+    mutate(FLOOR_P = predictions$FLOOR,
+           LATITUDE_P = predictions$LATITUDE,
+           LONGITUDE_P = predictions$LONGITUDE)
+  
+  ggplot(tempData, aes(x = LONGITUDE_P, y = LATITUDE_P, colour = FLOOR_P)) +
+    geom_point() +
+    facet_wrap(. ~ FLOOR, ncol = 2)
+}
+
 #' Calculates the following error metrics: absolute error, Mean Absolute Error, relative error, 
 #' Mean Relative Error, squared error, root mean squared error
 errorMetrics <- function(predictedValues, actualValues) {

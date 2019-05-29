@@ -1,7 +1,8 @@
-pacman::p_load(dplyr, caret, randomForest, e1071)
+pacman::p_load(dplyr, caret, randomForest, e1071, sp)
 source("scripts/pre_processing.R")
 source("scripts/training_functions.R")
 source("scripts/plots.R")
+source("scripts/utils.R")
 
 ####Loading data to memory####
 #Loading the training Wifi dataset
@@ -56,6 +57,19 @@ low_var_cols_floor_b2_index <- lowVarianceCol(wifi_data_floors_b2, 2)
 if (length(low_var_cols_floor_b2_index) != 0) {
   wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index]
 }
+
+# wifi_data_floors_b0 <- wifi_data_floors_b0 %>% 
+#   filter_at(vars(wapColIndex(wifi_data_floors_b0)), all_vars(. <= -25))
+# wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
+#   filter_at(vars(wapColIndex(wifi_data_floors_b1)), all_vars(. <= -25))
+# wifi_data_floors_b2 <- wifi_data_floors_b2 %>% 
+#   filter_at(vars(wapColIndex(wifi_data_floors_b2)), all_vars(. <= -25))
+
+
+# wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
+#   filter(ifelse(FLOOR == 2, RELATIVEPOSITION != 1, TRUE))
+
+
 
 #Sampling floors for each building
 wifi_data_floors_b0 <- wifi_data_floors_b0 %>% 
@@ -432,6 +446,25 @@ predictions_validation_lat_b2 <- predict(model_lat_b2, validation_set_lat_b2)
 predictions_validation_lon_b0 <- predict(model_lon_b0, validation_set_lon_b0)
 predictions_validation_lon_b1 <- predict(model_lon_b1, validation_set_lon_b1)
 predictions_validation_lon_b2 <- predict(model_lon_b2, validation_set_lon_b2)
+
+
+####Adjustments in predictions####
+#Adjusments based on LATITUDE and LONGITUDE predicted
+b1_points <- data.frame(LATITUDE = predictions_validation_lat_b1,
+                        LONGITUDE = predictions_validation_lon_b1)
+building_sector <- buildingSector(b1_points)
+for(i in 1:nrow(validation_set_floor_b1)) {
+  if (building_sector$Building[i] == 1 && building_sector$Sector[i] == 1) {
+    #Building 1, Sector 1 (middle)
+    if (predictions_validation_floor_b1[i] == 0) {
+      #For sector 1 of building 1, when the model predicts floor = 0, it is more likely to be
+      #floor = 1
+      predictions_validation_floor_b1[i] <- 1
+    }
+  }
+}
+
+
 
 ####Error Analysis####
 #For building predictions
