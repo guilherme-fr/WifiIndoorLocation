@@ -1,4 +1,4 @@
-pacman::p_load(dplyr, caret, randomForest, e1071, sp)
+pacman::p_load(dplyr, caret, randomForest, e1071)
 source("scripts/pre_processing.R")
 source("scripts/training_functions.R")
 source("scripts/plots.R")
@@ -72,16 +72,16 @@ if (length(low_var_cols_floor_b2_index) != 0) {
 
 
 #Sampling floors for each building
-wifi_data_floors_b0 <- wifi_data_floors_b0 %>% 
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+wifi_data_floors_b0 <- wifi_data_floors_b0 %>%
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
-wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+wifi_data_floors_b1 <- wifi_data_floors_b1 %>%
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
-wifi_data_floors_b2 <- wifi_data_floors_b2 %>% 
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>% 
+wifi_data_floors_b2 <- wifi_data_floors_b2 %>%
+  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
 #Removing columns with low variance (if any) after sampling
@@ -99,6 +99,22 @@ low_var_cols_floor_b2_index2 <- lowVarianceCol(wifi_data_floors_b2, 1)
 if (length(low_var_cols_floor_b2_index2) != 0) {
   wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index2]
 }
+
+#Normalize data
+# wifi_data_floors_b0[, wapColIndex(wifi_data_floors_b0)] <- normalize(
+#   x = wifi_data_floors_b0[, wapColIndex(wifi_data_floors_b0)],
+#   method = "range",
+#   margin = 1)
+# wifi_data_floors_b1[, wapColIndex(wifi_data_floors_b1)] <- normalize(
+#   x = wifi_data_floors_b1[, wapColIndex(wifi_data_floors_b1)],
+#   method = "range",
+#   margin = 1)
+# wifi_data_floors_b2[, wapColIndex(wifi_data_floors_b2)] <- normalize(
+#   x = wifi_data_floors_b2[, wapColIndex(wifi_data_floors_b2)],
+#   method = "range",
+#   margin = 1)
+
+
 
 #Creating the final dataset for Building location prediction
 wap_data_buildings <- wifi_data_buildings[, wapColIndex(wifi_data_buildings)]
@@ -199,8 +215,14 @@ number_predictors_fb0 <- ncol(data_floor_b0$training) - 1
 number_predictors_fb1 <- ncol(data_floor_b1$training) - 1
 number_predictors_fb2 <- ncol(data_floor_b2$training) - 1
 #Random Forest - B0
-model_floor_b0 <- randomForest(y = data_floor_b0$training$FLOOR,
-                               x = data_floor_b0$training[, 1:number_predictors_fb0],
+# model_floor_b0 <- randomForest(y = data_floor_b0$training$FLOOR,
+#                                x = data_floor_b0$training[, 1:number_predictors_fb0],
+#                                importance = T,
+#                                method = "rf",
+#                                ntree = 600,
+#                                mtry = 13)
+model_floor_b0 <- randomForest(y = training_data_floor_b0$FLOOR,
+                               x = training_data_floor_b0[, 1:number_predictors_fb0],
                                importance = T,
                                method = "rf",
                                ntree = 600,
@@ -235,12 +257,18 @@ model_floor_b1 <- svm(formula = FLOOR ~ .,
                       gamma = 0.00390625)
 
 #Random Forest - B2
-model_floor_b2 <- randomForest(y = training_data_floor_b2$FLOOR,
-                               x = training_data_floor_b2[, 1:number_predictors_fb2],
-                               importance = T,
-                               method = "rf",
-                               ntree = 500,
-                               mtry = 14)
+# model_floor_b2 <- randomForest(y = data_floor_b2$training$FLOOR,
+#                                x = data_floor_b2$training[, 1:number_predictors_fb2],
+#                                importance = T,
+#                                method = "rf",
+#                                ntree = 500,
+#                                mtry = 14)
+# model_floor_b2 <- randomForest(y = training_data_floor_b2$FLOOR,
+#                                x = training_data_floor_b2[, 1:number_predictors_fb2],
+#                                importance = T,
+#                                method = "rf",
+#                                ntree = 500,
+#                                mtry = 14)
 
 #K-NN - B2
 # model_floor_b2 <- knn3(FLOOR ~ ., data = data_floor_b2$training, k = 3)
@@ -266,7 +294,8 @@ number_predictors_latb2 <- ncol(data_lat_b2$training) - 1
 #                              mtry = 18)
 
 #K-NN - B0
-model_lat_b0 <- knnreg(LATITUDE ~ ., data = data_lat_b0$training, k = 5)
+# model_lat_b0 <- knnreg(LATITUDE ~ ., data = data_lat_b0$training, k = 5)
+model_lat_b0 <- knnreg(LATITUDE ~ ., data = training_data_lat_b0, k = 5)
 
 #SVM - B0
 # model_lat_b0 <- svm(formula = LATITUDE ~ .,
@@ -276,8 +305,14 @@ model_lat_b0 <- knnreg(LATITUDE ~ ., data = data_lat_b0$training, k = 5)
 #                       gamma = 4.768372e-07)
 
 #Random Forest - B1
-model_lat_b1 <- randomForest(y = data_lat_b1$training$LATITUDE,
-                             x = data_lat_b1$training[, 1:number_predictors_latb1],
+# model_lat_b1 <- randomForest(y = data_lat_b1$training$LATITUDE,
+#                              x = data_lat_b1$training[, 1:number_predictors_latb1],
+#                              importance = T,
+#                              method = "rf",
+#                              ntree = 500,
+#                              mtry = 20)
+model_lat_b1 <- randomForest(y = training_data_lat_b1$LATITUDE,
+                             x = training_data_lat_b1[, 1:number_predictors_latb1],
                              importance = T,
                              method = "rf",
                              ntree = 500,
@@ -302,7 +337,8 @@ model_lat_b1 <- randomForest(y = data_lat_b1$training$LATITUDE,
 #                              mtry = 20)
 
 #K-NN - B2
-model_lat_b2 <- knnreg(LATITUDE ~ ., data = data_lat_b2$training, k = 11)
+# model_lat_b2 <- knnreg(LATITUDE ~ ., data = data_lat_b2$training, k = 11)
+model_lat_b2 <- knnreg(LATITUDE ~ ., data = training_data_lat_b2, k = 11)
 
 #SVM - B2
 # model_lat_b2 <- svm(formula = LATITUDE ~ .,
@@ -326,7 +362,8 @@ number_predictors_lonb2 <- ncol(data_lon_b2$training) - 1
 #                              mtry = 15)
 
 #K-NN - B0
-model_lon_b0 <- knnreg(LONGITUDE ~ ., data = data_lon_b0$training, k = 9)
+# model_lon_b0 <- knnreg(LONGITUDE ~ ., data = data_lon_b0$training, k = 9)
+model_lon_b0 <- knnreg(LONGITUDE ~ ., data = training_data_lon_b0, k = 9)
 
 #SVM - B0
 # model_lon_b0 <- svm(formula = LONGITUDE ~ .,
@@ -336,8 +373,14 @@ model_lon_b0 <- knnreg(LONGITUDE ~ ., data = data_lon_b0$training, k = 9)
 #                       gamma = 9.536743e-07)
 
 #Random Forest - B1
-model_lon_b1 <- randomForest(y = data_lon_b1$training$LONGITUDE,
-                             x = data_lon_b1$training[, 1:number_predictors_lonb1],
+# model_lon_b1 <- randomForest(y = data_lon_b1$training$LONGITUDE,
+#                              x = data_lon_b1$training[, 1:number_predictors_lonb1],
+#                              importance = T,
+#                              method = "rf",
+#                              ntree = 500,
+#                              mtry = 20)
+model_lon_b1 <- randomForest(y = training_data_lon_b1$LONGITUDE,
+                             x = training_data_lon_b1[, 1:number_predictors_lonb1],
                              importance = T,
                              method = "rf",
                              ntree = 500,
@@ -362,7 +405,8 @@ model_lon_b1 <- randomForest(y = data_lon_b1$training$LONGITUDE,
 #                              mtry = 18)
 
 #K-NN - B2
-model_lon_b2 <- knnreg(LONGITUDE ~ ., data = data_lon_b2$training, k = 11)
+# model_lon_b2 <- knnreg(LONGITUDE ~ ., data = data_lon_b2$training, k = 11)
+model_lon_b2 <- knnreg(LONGITUDE ~ ., data = training_data_lon_b2, k = 11)
 
 #SVM - B2
 # model_lon_b2 <- svm(formula = LONGITUDE ~ .,
@@ -406,6 +450,41 @@ wapNamesB2 <- colnames(wifi_data_floors_b2[, wapColIndex(wifi_data_floors_b2)])
 validation_set_floor_b0_temp <- validation_set %>% filter(BUILDINGID == 0)
 validation_set_floor_b1_temp <- validation_set %>% filter(BUILDINGID == 1)
 validation_set_floor_b2_temp <- validation_set %>% filter(BUILDINGID == 2)
+
+
+#Normalize the validation set
+# validation_set_floor_b0_temp[, wapNamesB0] <- normalize(
+#   x = validation_set_floor_b0_temp[, wapNamesB0],
+#   method = "range",
+#   margin = 1)
+# validation_set_floor_b1_temp[, wapNamesB1] <- normalize(
+#   x = validation_set_floor_b1_temp[, wapNamesB1],
+#   method = "range",
+#   margin = 1)
+# validation_set_floor_b2_temp[, wapNamesB2] <- normalize(
+#   x = validation_set_floor_b2_temp[, wapNamesB2],
+#   method = "range",
+#   margin = 1)
+# 
+# #Replace constant values by 0
+# for(wap in wapNamesB0) {
+#   if (sum(validation_set_floor_b0_temp[, wap] != 0.5) == 0) {
+#     validation_set_floor_b0_temp[, wap] <- 0
+#   }
+# }
+# for(wap in wapNamesB1) {
+#   if (sum(validation_set_floor_b1_temp[, wap] != 0.5) == 0) {
+#     validation_set_floor_b1_temp[, wap] <- 0
+#   }
+# }
+# for(wap in wapNamesB2) {
+#   if (sum(validation_set_floor_b2_temp[, wap] != 0.5) == 0) {
+#     validation_set_floor_b2_temp[, wap] <- 0
+#   }
+# }
+
+
+
 validation_set_floor_b0 <- cbind(validation_set_floor_b0_temp[, wapNamesB0], 
                                  FLOOR = as.factor(validation_set_floor_b0_temp$FLOOR))
 validation_set_floor_b1 <- cbind(validation_set_floor_b1_temp[, wapNamesB1], 
@@ -450,19 +529,19 @@ predictions_validation_lon_b2 <- predict(model_lon_b2, validation_set_lon_b2)
 
 ####Adjustments in predictions####
 #Adjusments based on LATITUDE and LONGITUDE predicted
-b1_points <- data.frame(LATITUDE = predictions_validation_lat_b1,
-                        LONGITUDE = predictions_validation_lon_b1)
-building_sector <- buildingSector(b1_points)
-for(i in 1:nrow(validation_set_floor_b1)) {
-  if (building_sector$Building[i] == 1 && building_sector$Sector[i] == 1) {
-    #Building 1, Sector 1 (middle)
-    if (predictions_validation_floor_b1[i] == 0) {
-      #For sector 1 of building 1, when the model predicts floor = 0, it is more likely to be
-      #floor = 1
-      predictions_validation_floor_b1[i] <- 1
-    }
-  }
-}
+# b1_points <- data.frame(LATITUDE = predictions_validation_lat_b1,
+#                         LONGITUDE = predictions_validation_lon_b1)
+# building_sector <- buildingSector(b1_points)
+# for(i in 1:nrow(validation_set_floor_b1)) {
+#   if (building_sector$Building[i] == 1 && building_sector$Sector[i] == 1) {
+#     #Building 1, Sector 1 (middle)
+#     if (predictions_validation_floor_b1[i] == 0) {
+#       #For sector 1 of building 1, when the model predicts floor = 0, it is more likely to be
+#       #floor = 1
+#       predictions_validation_floor_b1[i] <- 1
+#     }
+#   }
+# }
 
 
 
