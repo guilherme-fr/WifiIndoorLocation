@@ -28,7 +28,7 @@ if (length(low_var_cols_index) != 0) {
 set.seed(123)
 
 ##Sample for BUILDINGS model
-wifi_data_buildings <- wifi_data %>% group_by(BUILDINGID, FLOOR) %>% sample_n(10)
+wifi_data_buildings <- wifi_data %>% group_by(BUILDINGID, FLOOR) %>% sample_n(30)
 
 #Removing columns with low variance (if any) after sampling
 low_var_cols_index2 <- lowVarianceCol(wifi_data_buildings, 2)
@@ -58,47 +58,34 @@ if (length(low_var_cols_floor_b2_index) != 0) {
   wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index]
 }
 
-# wifi_data_floors_b0 <- wifi_data_floors_b0 %>% 
-#   filter_at(vars(wapColIndex(wifi_data_floors_b0)), all_vars(. <= -25))
-# wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
-#   filter_at(vars(wapColIndex(wifi_data_floors_b1)), all_vars(. <= -25))
-# wifi_data_floors_b2 <- wifi_data_floors_b2 %>% 
-#   filter_at(vars(wapColIndex(wifi_data_floors_b2)), all_vars(. <= -25))
-
-
-# wifi_data_floors_b1 <- wifi_data_floors_b1 %>% 
-#   filter(ifelse(FLOOR == 2, RELATIVEPOSITION != 1, TRUE))
-
-
-
 #Sampling floors for each building
-wifi_data_floors_b0 <- wifi_data_floors_b0 %>%
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
-  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
-
-wifi_data_floors_b1 <- wifi_data_floors_b1 %>%
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
-  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
-
-wifi_data_floors_b2 <- wifi_data_floors_b2 %>%
-  group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
-  sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
+# wifi_data_floors_b0 <- wifi_data_floors_b0 %>%
+#   group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
+#   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
+# 
+# wifi_data_floors_b1 <- wifi_data_floors_b1 %>%
+#   group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
+#   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
+# 
+# wifi_data_floors_b2 <- wifi_data_floors_b2 %>%
+#   group_by(FLOOR, SPACEID, RELATIVEPOSITION) %>%
+#   sample_n(ifelse(n() < 5, n(), 5)) #Sample at most 5 points per location
 
 #Removing columns with low variance (if any) after sampling
-low_var_cols_floor_b0_index2 <- lowVarianceCol(wifi_data_floors_b0, 1)
-if (length(low_var_cols_floor_b0_index2) != 0) {
-  wifi_data_floors_b0 <- wifi_data_floors_b0[, -low_var_cols_floor_b0_index2]
-}
-
-low_var_cols_floor_b1_index2 <- lowVarianceCol(wifi_data_floors_b1, 1)
-if (length(low_var_cols_floor_b1_index2) != 0) {
-  wifi_data_floors_b1 <- wifi_data_floors_b1[, -low_var_cols_floor_b1_index2]
-}
-
-low_var_cols_floor_b2_index2 <- lowVarianceCol(wifi_data_floors_b2, 1)
-if (length(low_var_cols_floor_b2_index2) != 0) {
-  wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index2]
-}
+# low_var_cols_floor_b0_index2 <- lowVarianceCol(wifi_data_floors_b0, 1)
+# if (length(low_var_cols_floor_b0_index2) != 0) {
+#   wifi_data_floors_b0 <- wifi_data_floors_b0[, -low_var_cols_floor_b0_index2]
+# }
+# 
+# low_var_cols_floor_b1_index2 <- lowVarianceCol(wifi_data_floors_b1, 1)
+# if (length(low_var_cols_floor_b1_index2) != 0) {
+#   wifi_data_floors_b1 <- wifi_data_floors_b1[, -low_var_cols_floor_b1_index2]
+# }
+# 
+# low_var_cols_floor_b2_index2 <- lowVarianceCol(wifi_data_floors_b2, 1)
+# if (length(low_var_cols_floor_b2_index2) != 0) {
+#   wifi_data_floors_b2 <- wifi_data_floors_b2[, -low_var_cols_floor_b2_index2]
+# }
 
 #Normalize data
 # wifi_data_floors_b0[, wapColIndex(wifi_data_floors_b0)] <- normalize(
@@ -140,56 +127,56 @@ training_data_lon_b2 <- cbind(wap_data_floors_b2, LONGITUDE = wifi_data_floors_b
 
 ####Training models#####
 #Creating training and test sets for building predictions
-data_building <- createTrainAndTestSets(training_data_building, 
-                                        training_data_building$BUILDINGID, 
-                                        0.7, 
-                                        123)
+# data_building <- createTrainAndTestSets(training_data_building, 
+#                                         training_data_building$BUILDINGID, 
+#                                         0.7, 
+#                                         123)
 
 #Creating training and test sets for Floor predictions for each building
-data_floor_b0 <- createTrainAndTestSets(training_data_floor_b0, 
-                                        training_data_floor_b0$FLOOR,
-                                        0.7, 
-                                        123)
-data_floor_b1 <- createTrainAndTestSets(training_data_floor_b1, 
-                                        training_data_floor_b1$FLOOR,
-                                        0.7, 
-                                        123)
-data_floor_b2 <- createTrainAndTestSets(training_data_floor_b2, 
-                                        training_data_floor_b2$FLOOR,
-                                        0.7, 
-                                        123)
+# data_floor_b0 <- createTrainAndTestSets(training_data_floor_b0, 
+#                                         training_data_floor_b0$FLOOR,
+#                                         0.7, 
+#                                         123)
+# data_floor_b1 <- createTrainAndTestSets(training_data_floor_b1, 
+#                                         training_data_floor_b1$FLOOR,
+#                                         0.7, 
+#                                         123)
+# data_floor_b2 <- createTrainAndTestSets(training_data_floor_b2, 
+#                                         training_data_floor_b2$FLOOR,
+#                                         0.7, 
+#                                         123)
 
 #Creating training and test sets for LATITUDE predictions for each building
-data_lat_b0 <- createTrainAndTestSets(training_data_lat_b0, 
-                                        training_data_lat_b0$LATITUDE,
-                                        0.7, 
-                                        123)
-data_lat_b1 <- createTrainAndTestSets(training_data_lat_b1, 
-                                      training_data_lat_b1$LATITUDE,
-                                      0.7, 
-                                      123)
-data_lat_b2 <- createTrainAndTestSets(training_data_lat_b2, 
-                                      training_data_lat_b2$LATITUDE,
-                                      0.7, 
-                                      123)
+# data_lat_b0 <- createTrainAndTestSets(training_data_lat_b0, 
+#                                         training_data_lat_b0$LATITUDE,
+#                                         0.7, 
+#                                         123)
+# data_lat_b1 <- createTrainAndTestSets(training_data_lat_b1, 
+#                                       training_data_lat_b1$LATITUDE,
+#                                       0.7, 
+#                                       123)
+# data_lat_b2 <- createTrainAndTestSets(training_data_lat_b2, 
+#                                       training_data_lat_b2$LATITUDE,
+#                                       0.7, 
+#                                       123)
 
 #Creating training and test sets for LONGITUDE predictions for each building
-data_lon_b0 <- createTrainAndTestSets(training_data_lon_b0, 
-                                      training_data_lon_b0$LONGITUDE,
-                                      0.7, 
-                                      123)
-data_lon_b1 <- createTrainAndTestSets(training_data_lon_b1, 
-                                      training_data_lon_b1$LONGITUDE,
-                                      0.7, 
-                                      123)
-data_lon_b2 <- createTrainAndTestSets(training_data_lon_b2, 
-                                      training_data_lon_b2$LONGITUDE,
-                                      0.7, 
-                                      123)
+# data_lon_b0 <- createTrainAndTestSets(training_data_lon_b0, 
+#                                       training_data_lon_b0$LONGITUDE,
+#                                       0.7, 
+#                                       123)
+# data_lon_b1 <- createTrainAndTestSets(training_data_lon_b1, 
+#                                       training_data_lon_b1$LONGITUDE,
+#                                       0.7, 
+#                                       123)
+# data_lon_b2 <- createTrainAndTestSets(training_data_lon_b2, 
+#                                       training_data_lon_b2$LONGITUDE,
+#                                       0.7, 
+#                                       123)
 
 
 ####Training the building prediction model#####
-number_predictors_building <- ncol(data_building$training) - 1
+number_predictors_building <- ncol(training_data_building) - 1
 
 #Random Forest - Buildings
 # model_building <- randomForest(y = data_building$training$BUILDINGID,
@@ -211,9 +198,9 @@ model_building <- svm(formula = BUILDINGID ~ .,
 
 
 #####Training the floor prediction model for each building####
-number_predictors_fb0 <- ncol(data_floor_b0$training) - 1
-number_predictors_fb1 <- ncol(data_floor_b1$training) - 1
-number_predictors_fb2 <- ncol(data_floor_b2$training) - 1
+number_predictors_fb0 <- ncol(training_data_floor_b0) - 1
+number_predictors_fb1 <- ncol(training_data_floor_b1) - 1
+number_predictors_fb2 <- ncol(training_data_floor_b2) - 1
 #Random Forest - B0
 # model_floor_b0 <- randomForest(y = data_floor_b0$training$FLOOR,
 #                                x = data_floor_b0$training[, 1:number_predictors_fb0],
@@ -263,12 +250,12 @@ model_floor_b1 <- svm(formula = FLOOR ~ .,
 #                                method = "rf",
 #                                ntree = 500,
 #                                mtry = 14)
-# model_floor_b2 <- randomForest(y = training_data_floor_b2$FLOOR,
-#                                x = training_data_floor_b2[, 1:number_predictors_fb2],
-#                                importance = T,
-#                                method = "rf",
-#                                ntree = 500,
-#                                mtry = 14)
+model_floor_b2 <- randomForest(y = training_data_floor_b2$FLOOR,
+                               x = training_data_floor_b2[, 1:number_predictors_fb2],
+                               importance = T,
+                               method = "rf",
+                               ntree = 500,
+                               mtry = 14)
 
 #K-NN - B2
 # model_floor_b2 <- knn3(FLOOR ~ ., data = data_floor_b2$training, k = 3)
@@ -282,9 +269,9 @@ model_floor_b1 <- svm(formula = FLOOR ~ .,
 
 
 ####Training the LATITUDE prediction model for each building####
-number_predictors_latb0 <- ncol(data_lat_b0$training) - 1
-number_predictors_latb1 <- ncol(data_lat_b1$training) - 1
-number_predictors_latb2 <- ncol(data_lat_b2$training) - 1
+number_predictors_latb0 <- ncol(training_data_lat_b0) - 1
+number_predictors_latb1 <- ncol(training_data_lat_b1) - 1
+number_predictors_latb2 <- ncol(training_data_lat_b2) - 1
 #Random Forest - B0
 # model_lat_b0 <- randomForest(y = data_lat_b0$training$LATITUDE,
 #                              x = data_lat_b0$training[, 1:number_predictors_latb0],
@@ -350,9 +337,9 @@ model_lat_b2 <- knnreg(LATITUDE ~ ., data = training_data_lat_b2, k = 11)
 
 
 #####Training the LONGITUDE prediction model for each building####
-number_predictors_lonb0 <- ncol(data_lon_b0$training) - 1
-number_predictors_lonb1 <- ncol(data_lon_b1$training) - 1
-number_predictors_lonb2 <- ncol(data_lon_b2$training) - 1
+number_predictors_lonb0 <- ncol(training_data_lon_b0) - 1
+number_predictors_lonb1 <- ncol(training_data_lon_b1) - 1
+number_predictors_lonb2 <- ncol(training_data_lon_b2) - 1
 #Random Forest - B0
 # model_lon_b0 <- randomForest(y = data_lon_b0$training$LONGITUDE,
 #                              x = data_lon_b0$training[, 1:number_predictors_lonb0],
@@ -418,22 +405,22 @@ model_lon_b2 <- knnreg(LONGITUDE ~ ., data = training_data_lon_b2, k = 11)
 
 ####Predictions####
 #Predicting the building in test set created
-predictions_building <- predict(model_building, data_building$testing, type = "class")
+# predictions_building <- predict(model_building, data_building$testing, type = "class")
 
 #Predictions the floor in test set created for each building
-predictions_floor_b0 <- predict(model_floor_b0, data_floor_b0$testing, type = "class")
-predictions_floor_b1 <- predict(model_floor_b1, data_floor_b1$testing, type = "class")
-predictions_floor_b2 <- predict(model_floor_b2, data_floor_b2$testing, type = "class")
+# predictions_floor_b0 <- predict(model_floor_b0, data_floor_b0$testing, type = "class")
+# predictions_floor_b1 <- predict(model_floor_b1, data_floor_b1$testing, type = "class")
+# predictions_floor_b2 <- predict(model_floor_b2, data_floor_b2$testing, type = "class")
 
 #Predictions the LATITUDE in test set created for each building
-predictions_lat_b0 <- predict(model_lat_b0, data_lat_b0$testing)
-predictions_lat_b1 <- predict(model_lat_b1, data_lat_b1$testing)
-predictions_lat_b2 <- predict(model_lat_b2, data_lat_b2$testing)
+# predictions_lat_b0 <- predict(model_lat_b0, data_lat_b0$testing)
+# predictions_lat_b1 <- predict(model_lat_b1, data_lat_b1$testing)
+# predictions_lat_b2 <- predict(model_lat_b2, data_lat_b2$testing)
 
 #Predictions the LONGITUDE in test set created for each building
-predictions_lon_b0 <- predict(model_lon_b0, data_lon_b0$testing)
-predictions_lon_b1 <- predict(model_lon_b1, data_lon_b1$testing)
-predictions_lon_b2 <- predict(model_lon_b2, data_lon_b2$testing)
+# predictions_lon_b0 <- predict(model_lon_b0, data_lon_b0$testing)
+# predictions_lon_b1 <- predict(model_lon_b1, data_lon_b1$testing)
+# predictions_lon_b2 <- predict(model_lon_b2, data_lon_b2$testing)
 
 #Prepare the validation set for prediction
 validation_set <- replaceNoWAPValues(wifi_validation_original, no_wap_value)
@@ -482,8 +469,6 @@ validation_set_floor_b2_temp <- validation_set %>% filter(BUILDINGID == 2)
 #     validation_set_floor_b2_temp[, wap] <- 0
 #   }
 # }
-
-
 
 validation_set_floor_b0 <- cbind(validation_set_floor_b0_temp[, wapNamesB0], 
                                  FLOOR = as.factor(validation_set_floor_b0_temp$FLOOR))
@@ -547,14 +532,14 @@ predictions_validation_lon_b2 <- predict(model_lon_b2, validation_set_lon_b2)
 
 ####Error Analysis####
 #For building predictions
-assess_model_building <- postResample(predictions_building, data_building$testing$BUILDINGID)
+# assess_model_building <- postResample(predictions_building, data_building$testing$BUILDINGID)
 assess_model_validation_building <- postResample(predictions_validation_buildings, 
                                                  validation_set_building$BUILDINGID)
 
 #For floor predictions
-assess_model_floor_b0 <- postResample(predictions_floor_b0, data_floor_b0$testing$FLOOR)
-assess_model_floor_b1 <- postResample(predictions_floor_b1, data_floor_b1$testing$FLOOR)
-assess_model_floor_b2 <- postResample(predictions_floor_b2, data_floor_b2$testing$FLOOR)
+# assess_model_floor_b0 <- postResample(predictions_floor_b0, data_floor_b0$testing$FLOOR)
+# assess_model_floor_b1 <- postResample(predictions_floor_b1, data_floor_b1$testing$FLOOR)
+# assess_model_floor_b2 <- postResample(predictions_floor_b2, data_floor_b2$testing$FLOOR)
 assess_model_validation_floor_b0 <- postResample(predictions_validation_floor_b0, 
                                                  validation_set_floor_b0$FLOOR)
 assess_model_validation_floor_b1 <- postResample(predictions_validation_floor_b1, 
@@ -563,9 +548,9 @@ assess_model_validation_floor_b2 <- postResample(predictions_validation_floor_b2
                                                  validation_set_floor_b2$FLOOR)
 
 #For LATITUDE predictions
-assess_model_lat_b0 <- postResample(predictions_lat_b0, data_lat_b0$testing$LATITUDE)
-assess_model_lat_b1 <- postResample(predictions_lat_b1, data_lat_b1$testing$LATITUDE)
-assess_model_lat_b2 <- postResample(predictions_lat_b2, data_lat_b2$testing$LATITUDE)
+# assess_model_lat_b0 <- postResample(predictions_lat_b0, data_lat_b0$testing$LATITUDE)
+# assess_model_lat_b1 <- postResample(predictions_lat_b1, data_lat_b1$testing$LATITUDE)
+# assess_model_lat_b2 <- postResample(predictions_lat_b2, data_lat_b2$testing$LATITUDE)
 assess_model_validation_lat_b0 <- postResample(predictions_validation_lat_b0, 
                                                  validation_set_lat_b0$LATITUDE)
 errors_model_validation_lat_b0 <- errorMetrics(predictions_validation_lat_b0, validation_set_lat_b0$LATITUDE)
@@ -577,9 +562,9 @@ assess_model_validation_lat_b2 <- postResample(predictions_validation_lat_b2,
 errors_model_validation_lat_b2 <- errorMetrics(predictions_validation_lat_b2, validation_set_lat_b2$LATITUDE)
 
 #For LONGITUDE predictions
-assess_model_lon_b0 <- postResample(predictions_lon_b0, data_lon_b0$testing$LONGITUDE)
-assess_model_lon_b1 <- postResample(predictions_lon_b1, data_lon_b1$testing$LONGITUDE)
-assess_model_lon_b2 <- postResample(predictions_lon_b2, data_lon_b2$testing$LONGITUDE)
+# assess_model_lon_b0 <- postResample(predictions_lon_b0, data_lon_b0$testing$LONGITUDE)
+# assess_model_lon_b1 <- postResample(predictions_lon_b1, data_lon_b1$testing$LONGITUDE)
+# assess_model_lon_b2 <- postResample(predictions_lon_b2, data_lon_b2$testing$LONGITUDE)
 assess_model_validation_lon_b0 <- postResample(predictions_validation_lon_b0, 
                                                validation_set_lon_b0$LONGITUDE)
 errors_model_validation_lon_b0 <- errorMetrics(predictions_validation_lon_b0, validation_set_lon_b0$LONGITUDE)
@@ -590,3 +575,32 @@ assess_model_validation_lon_b2 <- postResample(predictions_validation_lon_b2,
                                                validation_set_lon_b2$LONGITUDE)
 errors_model_validation_lon_b2 <- errorMetrics(predictions_validation_lon_b2, validation_set_lon_b2$LONGITUDE)
 
+#Saving models in file system
+save(model_building, file = "models/model_building.rda")
+
+save(model_floor_b0, file = "models/model_floor_b0.rda")
+save(model_floor_b1, file = "models/model_floor_b1.rda")
+save(model_floor_b2, file = "models/model_floor_b2.rda")
+
+save(model_lat_b0, file = "models/model_lat_b0.rda")
+save(model_lat_b1, file = "models/model_lat_b1.rda")
+save(model_lat_b2, file = "models/model_lat_b2.rda")
+
+save(model_lon_b0, file = "models/model_lon_b0.rda")
+save(model_lon_b1, file = "models/model_lon_b1.rda")
+save(model_lon_b2, file = "models/model_lon_b2.rda")
+
+#Saving the WAPs used for each model
+write.csv(wapNames, file = "models/wap_building.csv", row.names = FALSE)
+
+write.csv(wapNamesB0, file = "models/wap_floor_b0.csv", row.names = FALSE)
+write.csv(wapNamesB1, file = "models/wap_floor_b1.csv", row.names = FALSE)
+write.csv(wapNamesB2, file = "models/wap_floor_b2.csv", row.names = FALSE)
+
+write.csv(wapNamesB0, file = "models/wap_lat_b0.csv", row.names = FALSE)
+write.csv(wapNamesB1, file = "models/wap_lat_b1.csv", row.names = FALSE)
+write.csv(wapNamesB2, file = "models/wap_lat_b2.csv", row.names = FALSE)
+
+write.csv(wapNamesB0, file = "models/wap_lon_b0.csv", row.names = FALSE)
+write.csv(wapNamesB1, file = "models/wap_lon_b1.csv", row.names = FALSE)
+write.csv(wapNamesB2, file = "models/wap_lon_b2.csv", row.names = FALSE)
