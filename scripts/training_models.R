@@ -576,19 +576,19 @@ assess_model_validation_lon_b2 <- postResample(predictions_validation_lon_b2,
 errors_model_validation_lon_b2 <- errorMetrics(predictions_validation_lon_b2, validation_set_lon_b2$LONGITUDE)
 
 #Saving models in file system
-save(model_building, file = "models/model_building.rda")
+saveRDS(model_building, file = "models/model_building.rda")
 
-save(model_floor_b0, file = "models/model_floor_b0.rda")
-save(model_floor_b1, file = "models/model_floor_b1.rda")
-save(model_floor_b2, file = "models/model_floor_b2.rda")
+saveRDS(model_floor_b0, file = "models/model_floor_b0.rda")
+saveRDS(model_floor_b1, file = "models/model_floor_b1.rda")
+saveRDS(model_floor_b2, file = "models/model_floor_b2.rda")
 
-save(model_lat_b0, file = "models/model_lat_b0.rda")
-save(model_lat_b1, file = "models/model_lat_b1.rda")
-save(model_lat_b2, file = "models/model_lat_b2.rda")
+saveRDS(model_lat_b0, file = "models/model_lat_b0.rda")
+saveRDS(model_lat_b1, file = "models/model_lat_b1.rda")
+saveRDS(model_lat_b2, file = "models/model_lat_b2.rda")
 
-save(model_lon_b0, file = "models/model_lon_b0.rda")
-save(model_lon_b1, file = "models/model_lon_b1.rda")
-save(model_lon_b2, file = "models/model_lon_b2.rda")
+saveRDS(model_lon_b0, file = "models/model_lon_b0.rda")
+saveRDS(model_lon_b1, file = "models/model_lon_b1.rda")
+saveRDS(model_lon_b2, file = "models/model_lon_b2.rda")
 
 #Saving the WAPs used for each model
 write.csv(wapNames, file = "models/wap_building.csv", row.names = FALSE)

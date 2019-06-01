@@ -1,19 +1,19 @@
 pacman::p_load(dplyr, reshape, caret)
 
-wapNotPresent <- function(wapData) {
-  #Apply function to all WAP info columns
-  wap_notpresent_index <- apply(wapData, 2, function(wap_data) {
-    #Anonymous function that returns a vector of logical values. TRUE if the WAP was captured in some record
-    #of the data. FALSE otherwise.
-    wap_present_count <- sum(wap_data < 100)
-    
-    ifelse(wap_present_count > 0, FALSE, TRUE)
-  })
-  
-  allWap <- colnames(wapData)
-  result <- allWap[wap_notpresent_index]
-  result
-}
+# wapNotPresent <- function(wapData) {
+#   #Apply function to all WAP info columns
+#   wap_notpresent_index <- apply(wapData, 2, function(wap_data) {
+#     #Anonymous function that returns a vector of logical values. TRUE if the WAP was captured in some record
+#     #of the data. FALSE otherwise.
+#     wap_present_count <- sum(wap_data < 100)
+#     
+#     ifelse(wap_present_count > 0, FALSE, TRUE)
+#   })
+#   
+#   allWap <- colnames(wapData)
+#   result <- allWap[wap_notpresent_index]
+#   result
+# }
 
 wapVariance <- function(wapData) {
   wap_variance <- apply(wapData, 2, function(wap_data) {
