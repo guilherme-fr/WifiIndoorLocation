@@ -1,10 +1,10 @@
-pacman::p_load(dplyr, caret, randomForest, e1071)
+pacman::p_load(dplyr, caret, randomForest, e1071, BBmisc)
 source("scripts/pre_processing.R")
 source("scripts/utils.R")
 
 ####Files####
 #File for test
-file_test_set <- "dataset/validationData.csv"
+file_test_set <- "dataset/testData.csv"
 
 #Files for saved models
 file_model_building <- "models/model_building.rda"
@@ -38,6 +38,7 @@ file_wap_lon_b2 <- "models/wap_lon_b2.csv"
 
 ####Constants####
 no_wap_value <- -105
+normalize_data <- FALSE
 
 ####Loading objects from file system####
 #Loading models
@@ -104,6 +105,69 @@ wap_set_lon_b0 <- test_set_b0[, wap_names_lon_b0[, 1] ]
 wap_set_lon_b1 <- test_set_b1[, wap_names_lon_b1[, 1] ]
 wap_set_lon_b2 <- test_set_b2[, wap_names_lon_b2[, 1] ]
 
+####Normalize the data by row####
+if (normalize_data) {
+  #Floors
+  wap_set_floor_b0 <- normalize(x = wap_set_floor_b0, method = "range", margin = 1)
+  for(wap in colnames(wap_set_floor_b0)) {
+    if (sum(wap_set_floor_b0[, wap] != 0.5) == 0) {
+      wap_set_floor_b0[, wap] <- 0
+    }
+  }
+  wap_set_floor_b1 <- normalize(x = wap_set_floor_b1, method = "range", margin = 1)
+  for(wap in colnames(wap_set_floor_b1)) {
+    if (sum(wap_set_floor_b1[, wap] != 0.5) == 0) {
+      wap_set_floor_b1[, wap] <- 0
+    }
+  }
+  wap_set_floor_b2 <- normalize(x = wap_set_floor_b2, method = "range", margin = 1)
+  for(wap in colnames(wap_set_floor_b2)) {
+    if (sum(wap_set_floor_b2[, wap] != 0.5) == 0) {
+      wap_set_floor_b2[, wap] <- 0
+    }
+  }
+  
+  #Latitude
+  wap_set_lat_b0 <- normalize(x = wap_set_lat_b0, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lat_b0)) {
+    if (sum(wap_set_lat_b0[, wap] != 0.5) == 0) {
+      wap_set_lat_b0[, wap] <- 0
+    }
+  }
+  wap_set_lat_b1 <- normalize(x = wap_set_lat_b1, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lat_b1)) {
+    if (sum(wap_set_lat_b1[, wap] != 0.5) == 0) {
+      wap_set_lat_b1[, wap] <- 0
+    }
+  }
+  wap_set_lat_b2 <- normalize(x = wap_set_lat_b2, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lat_b2)) {
+    if (sum(wap_set_lat_b2[, wap] != 0.5) == 0) {
+      wap_set_lat_b2[, wap] <- 0
+    }
+  }
+  
+  #Longitude
+  wap_set_lon_b0 <- normalize(x = wap_set_lon_b0, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lon_b0)) {
+    if (sum(wap_set_lon_b0[, wap] != 0.5) == 0) {
+      wap_set_lon_b0[, wap] <- 0
+    }
+  }
+  wap_set_lon_b1 <- normalize(x = wap_set_lon_b1, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lon_b1)) {
+    if (sum(wap_set_lon_b1[, wap] != 0.5) == 0) {
+      wap_set_lon_b1[, wap] <- 0
+    }
+  }
+  wap_set_lon_b2 <- normalize(x = wap_set_lon_b2, method = "range", margin = 1)
+  for(wap in colnames(wap_set_lon_b2)) {
+    if (sum(wap_set_lon_b2[, wap] != 0.5) == 0) {
+      wap_set_lon_b2[, wap] <- 0
+    }
+  }
+}
+
 ####Floor predictions####
 predictions_floor_b0 <- predict(model_floor_b0, wap_set_floor_b0, type = "class")
 predictions_floor_b1 <- predict(model_floor_b1, wap_set_floor_b1, type = "class")
@@ -119,21 +183,6 @@ predictions_lon_b0 <- predict(model_lon_b0, wap_set_lon_b0)
 predictions_lon_b1 <- predict(model_lon_b1, wap_set_lon_b1)
 predictions_lon_b2 <- predict(model_lon_b2, wap_set_lon_b2)
 
-####Post Processing####
-# b1_points <- data.frame(LATITUDE = predictions_lat_b1,
-#                         LONGITUDE = predictions_lon_b1)
-# building_sector <- buildingSector(b1_points)
-# for(i in 1:nrow(wap_set_floor_b1)) {
-#   if (building_sector$Building[i] == 1 && building_sector$Sector[i] == 1) {
-#     #Building 1, Sector 1 (middle)
-#     if (predictions_floor_b1[i] == 0) {
-#       #For sector 1 of building 1, when the model predicts floor = 0, it is more likely to be
-#       #floor = 1
-#       predictions_floor_b1[i] <- 1
-#     }
-#   }
-# }
-
 ####Preparing output file####
 #Preparing Floor column
 floor_b0_temp <- test_set_b0 %>% select(ID) %>% mutate(FLOOR = predictions_floor_b0)
@@ -141,7 +190,6 @@ floor_b1_temp <- test_set_b1 %>% select(ID) %>% mutate(FLOOR = predictions_floor
 floor_b2_temp <- test_set_b2 %>% select(ID) %>% mutate(FLOOR = predictions_floor_b2)
 
 result_floors <- rbind(floor_b0_temp, floor_b1_temp, floor_b2_temp)
-result_floors <- result_floors %>% arrange(ID)
 
 #Preparing Latitude column
 lat_b0_temp <- test_set_b0 %>% select(ID) %>% mutate(LATITUDE = predictions_lat_b0)
@@ -149,7 +197,6 @@ lat_b1_temp <- test_set_b1 %>% select(ID) %>% mutate(LATITUDE = predictions_lat_
 lat_b2_temp <- test_set_b2 %>% select(ID) %>% mutate(LATITUDE = predictions_lat_b2)
 
 result_lat <- rbind(lat_b0_temp, lat_b1_temp, lat_b2_temp)
-result_lat <- result_lat %>% arrange(ID)
 
 #Preparing Longitude column
 lon_b0_temp <- test_set_b0 %>% select(ID) %>% mutate(LONGITUDE = predictions_lon_b0)
@@ -157,18 +204,38 @@ lon_b1_temp <- test_set_b1 %>% select(ID) %>% mutate(LONGITUDE = predictions_lon
 lon_b2_temp <- test_set_b2 %>% select(ID) %>% mutate(LONGITUDE = predictions_lon_b2)
 
 result_lon <- rbind(lon_b0_temp, lon_b1_temp, lon_b2_temp)
-result_lon <- result_lon %>% arrange(ID)
 
 #Preparing Building column
 result_building <- test_set %>% select(ID) %>% mutate(BUILDINGID = predictions_bulding)
-result_building <- result_building %>% arrange(ID)
 
 #Preparing final result
-result <- result_building %>% 
-  inner_join(result_floors, by = "ID") %>% 
-  inner_join(result_lat, by = "ID") %>% 
-  inner_join(result_lon, by = "ID") %>%  
+result <- result_lat %>%
+  inner_join(result_lon, by = "ID") %>%
+  inner_join(result_floors, by = "ID") %>%
+  arrange(ID) %>%
   mutate(ID = NULL)
 
 ####Saving the final result in file system####
 write.csv(result, file = "dataset/test_result.csv", row.names = FALSE, quote = FALSE)
+
+#Errors measures based on IPIN2015 competition
+calculate_error <- FALSE
+if (calculate_error) {
+  building_penalty <- 50
+  floor_penalty <- 4
+  
+  result_building <- result_building %>% arrange(ID)
+  result_floors <- result_floors %>% arrange(ID)
+  result_lat <- result_lat %>% arrange(ID)
+  result_lon <- result_lon %>% arrange(ID)
+  
+  building_error <- building_penalty * ifelse(result_building$BUILDINGID == test_set_original$BUILDINGID, 0, 1)
+  floor_error <- floor_penalty * ifelse(result_floors$FLOOR == test_set_original$FLOOR, 0, 1)
+  # floor_error <- floor_penalty * abs(result_floors$FLOOR - test_set_original$FLOOR)
+  coord_error <- sqrt((result_lat$LATITUDE - test_set_original$LATITUDE)^2 + 
+                        (result_lon$LONGITUDE - test_set_original$LONGITUDE)^2)
+  
+  error_vector <- building_error + floor_error + coord_error
+  error <- mean(error_vector)
+}
+

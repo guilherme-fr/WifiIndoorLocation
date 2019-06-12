@@ -33,3 +33,24 @@ distanceToLine <- function(point, line.point1, line.point2) {
 isInside <- function(point, square., square.point2, square.point3, square.point4) {
   
 }
+
+wapTrans <- function(wifiData) {
+  wapIndex <- wapColIndex(wifiData)
+  wapData <- wifiData[, wapIndex]
+  for (i in 1:nrow(wapData)) {
+    for (j in 1:ncol(wapData)) {
+      r <- floor(runif(1, min = 0, max = 3))
+      if (wapData[i, j] != -105 && wapData[i, j] != 0) {
+        if (r == 1) {
+          wapData[i, j] <- wapData[i, j] + 1
+        } else if (r == 2) {
+          wapData[i, j] <- wapData[i, j] - 1
+        }
+      }
+       
+    }
+  }
+  
+  wifiData[, wapIndex] <- wapData
+  wifiData
+}
